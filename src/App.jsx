@@ -27,18 +27,16 @@ export default function App() {
   };
 
   return (
-    <div className='conteiner-upload-home'>
+    <>
       <h1 className='upload-title'>Upload do Relatório</h1>
 
       <div className="image-upload-container">
         <img src="/upload.png" alt="upload-image" className='upload-image'/>
-        <div className="container-input-upload">
-          <label for="fileInput" class="custom-file-input">Escolha um arquivo</label>
-          <input type="file" id="fileInput" onChange={handleFileChange}></input>
-        <button onClick={handleUpload} className='upload-button'>{'>'}</button>
+        <div className="input-group mb-3">
+            <input type="file" className="form-control" id="inputGroupFile02" onChange={handleFileChange}></input>
+            <button className="input-group-text label-upload"  onClick={handleUpload}>Upload</button>
+        </div>
       </div>
-      </div>
-      
-    </div>
+    </>
   );
 }

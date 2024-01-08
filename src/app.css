@@ -43,34 +43,7 @@ body{
     align-items: center;
     flex-direction: column;
 }
-
-.container-input-upload{
-    width: 100%;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.custom-file-input {
-    background-image: linear-gradient(-34deg, #2ded9ad2, #1792be);
-    color: white;
-    padding: 10px 15px;
-    
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.385);
-}
-
-input[type="file"] {
-    opacity: 0;
-    position: absolute;
-    z-index: -1;
-}
-
-.upload-button{
+.label-upload{
     background-image: linear-gradient(-34deg, #2ded9ad2, #1792be);
     color: white;
     padding: 10px 15px;
