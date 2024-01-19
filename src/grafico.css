@@ -1,7 +1,7 @@
 
 body{
   color: #3b3b3b;
-  background-color: #fff;
+  background-color: #ffffff;
   display: flex;
 }
 
@@ -12,7 +12,7 @@ h1{
 h2{
   font-size: 1.3rem;
   margin: 0;
-  padding: 0;
+  padding: 2rem 80px;
 }
 
 .Conteiner-Graphics{
@@ -50,5 +50,32 @@ h2{
 
 table{
   font-size: 1.1rem;
-  width: 400px;
+  min-width: 450px;
 }
+
+
+  .table-learning {
+  border-collapse: collapse;
+  margin: auto;
+  margin-bottom: 5rem;
+  font-size: 0.9rem;
+  }
+  
+  .table-learning  th, .table-learning td {
+  padding: 5px 10px;
+  text-align: center;
+  }
+  
+  .table-learning th{
+  font-weight: bold;
+  }
+  
+  
+  tr:nth-child(even) {
+  background-color: #dce8eb;
+  }
+  
+  tr:hover:nth-child(1n + 2) {
+  background-color: #085F63;
+  color: #fff;
+  }

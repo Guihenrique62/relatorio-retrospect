@@ -8,21 +8,25 @@ function Grafico() {
   let [data, setData] = useState([])
   let [atendTotal, setAtendTotal] = useState([])
   let [ultimoMes, setultimoMes] = useState([])
+  let [learnAtual, setLearnAtual] = useState([])
 
   useEffect(() => {
 
     const fetchData = async () => {
       try {
         // Configuração do cabeçalho para contornar o CORS
-        const response = await axios.get('http://192.168.62.119:8000/api/dados',);
+        const response = await axios.get('http://192.168.62.76:8000/api/dados',);
 
         // Estruturando os dados para o formato que a biblioteca de gráficos espera
         const formattedData = [["Tarefas", "Horas"]];
-        const atendTotal = [["Mês", "Atendimentos", "Pendentes", "Atrasados", "Erros"]];
+        const atendTotal = [["Mês", "Atendimentos", "Erros por Chamado", "Erros por Analise"]];
         const formattedMesAtual = [["Tarefas", "Horas"]]
+        const formattedLearnAtual = []
 
         let dadosAno = response.data.data
         let somaTarefas = {};
+
+        console.log(dadosAno)
 
         // Iterar sobre cada mês
         for (const mes in dadosAno) {
@@ -40,7 +44,7 @@ function Grafico() {
         // Converter o objeto em um array de objetos
         const anoInteiro = Object.entries(somaTarefas).map(([tarefa, total]) => ({ Tarefa: tarefa, Total_Valid: total }));
         anoInteiro.forEach(({ Tarefa, Total_Valid }) => {
-          if (Tarefa != "Atendimento Concluido" && Tarefa != "Elaboracao Card de Erro" && Tarefa != 'Atendimento Atrasado' && Tarefa != "Atendimento Pendente") {
+          if (Tarefa != "Atendimento Concluido" && Tarefa != "Card de Erro por Chamados" && Tarefa != "Card de Erro por Analise") {
             formattedData.push([Tarefa, Total_Valid]);
           }
         });
@@ -50,32 +54,47 @@ function Grafico() {
           // Verificar se a tarefa já existe no objeto somaTarefas
           if (mes === Object.keys(dadosAno).slice(-1)[0]) {
             for (const tarefa of dadosAno[mes]) {
-              if (tarefa.Tarefa !== "Atendimento Concluido" && tarefa.Tarefa !== "Elaboracao Card de Erro" && tarefa.Tarefa != 'Atendimento Atrasado' && tarefa.Tarefa != "Atendimento Pendente") {
+              if (tarefa.Tarefa !== "Atendimento Concluido" && tarefa.Tarefa !== "Card de Erro por Chamados" && tarefa.Tarefa !== "Card de Erro por Analise") {
                 formattedMesAtual.push([tarefa.Tarefa, tarefa.Total_Valid]);
               }
             }
           }
-
         }
+
+        for (const mes in dadosAno) {
+          // Verificar se a tarefa já existe no objeto somaTarefas
+          if (mes === Object.keys(dadosAno).slice(-1)[0]) {
+            for (const tarefa of dadosAno[mes]) {
+              formattedLearnAtual.push([tarefa.Tarefa,tarefa.Resultado_e_Aprendizado])
+            }
+          }
+        }
+
+
         //Pega somente as tarefas selecionadas
         for (const mes in dadosAno) {
           if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Concluido")) {
             atendTotal.push([mes, dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Concluido").Total_Valid]);
           }
-          if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Pendente")) {
-            atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Pendente").Total_Valid);
+          // if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Pendente")) {
+          //   atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Pendente").Total_Valid);
+          // }
+          // if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Atrasado")) {
+          //   atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Atrasado").Total_Valid);
+          // }
+          if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Card de Erro por Chamados")) {
+            atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Card de Erro por Chamados").Total_Valid);
           }
-          if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Atrasado")) {
-            atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Atendimento Atrasado").Total_Valid);
-          }
-          if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Elaboracao Card de Erro")) {
-            atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Elaboracao Card de Erro").Total_Valid);
+          if (dadosAno[mes].find(tarefa => tarefa.Tarefa === "Card de Erro por Analise")) {
+            atendTotal[atendTotal.length - 1].push(dadosAno[mes].find(tarefa => tarefa.Tarefa === "Card de Erro por Analise").Total_Valid);
           }
         }
 
+        console.log(atendTotal)
         setultimoMes(formattedMesAtual)
         setData(formattedData);
         setAtendTotal(atendTotal)
+        setLearnAtual(formattedLearnAtual)
 
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
@@ -112,6 +131,7 @@ function Grafico() {
     ultimoMesminTotal = ultimoMesminTotal + ultimoMes[x][1]
   }
 
+  console.log(learnAtual)
   // Ordenando o array sem o cabeçalho com base nas horas em ordem decrescente
   const dataWithoutHeader = data.slice(1);
   const sortedData = dataWithoutHeader.sort((a, b) => b[1] - a[1]);
@@ -129,11 +149,11 @@ function Grafico() {
 
         <Chart
           chartType="Bar"
-          width="100%"
+          width="800px"
           height="300px"
           data={atendTotal}
           options={{
-            colors: ['#34ea80', '#bcce48', '#ce9d48', '#c9452e'],
+            colors: ['#34ea80', '#dd7f32','#c9452e'],
           }}
         />
       </div>
@@ -168,7 +188,25 @@ function Grafico() {
         />
       </div>
 
-
+      <div className="container-table-learnig">
+        <h2>Aprendizados deste Mês:</h2>
+        <table className='table-learning'>
+            <thead>
+              <tr>
+                <th>Tarefa</th>
+                <th>Aprendizado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {learnAtual.map((item, index) => (
+                <tr key={index}>
+                  <td>{item[0]}</td>
+                  <td>{item[1]}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+      </div>
 
 
       {/* Tabela total de horas */}
@@ -201,6 +239,7 @@ function Grafico() {
         />
       </div>
 
+      
     </div>
   )
 }

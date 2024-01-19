@@ -28,9 +28,9 @@ export default function Upload() {
       }
 
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append('file', selectedFile,selectedFile.name);
 
-      await axios.post('http://192.168.62.119:8000/api/upload', formData, {
+      await axios.post('http://192.168.62.76:8000/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
