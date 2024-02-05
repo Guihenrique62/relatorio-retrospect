@@ -36,7 +36,7 @@ def convert_to_float(value):
     else:
         raise ValueError(f'Tipo não suportado: {type(value)}')
 
-df_final = {}
+
 
 @app.post("/api/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -62,7 +62,7 @@ async def upload_file(file: UploadFile = File(...)):
                     dados_por_pagina[pagina] = pd.read_excel(arquivo, sheet_name=pagina)
                     print(f"A pagina {pagina} Foi lida com sucesso!")
 
-        
+        print(dados_por_pagina)
         #Faz um loop em todos as paginas e guarda o valor total de cada uma em um array
         arr_total = []
         for df_atual in dados_por_pagina:
@@ -73,6 +73,8 @@ async def upload_file(file: UploadFile = File(...)):
             df_atual['Total_Valid'] = [convert_to_float(val) for val in df_atual['Total']]
 
         # #Cria um novo df somente com as colunas validas
+        global df_final
+        df_final = {}
         
         for pagina in dados_por_pagina:
             df_final[pagina] = dados_por_pagina[pagina][['Tarefa','Total_Valid','Resultado_e_Aprendizado']]

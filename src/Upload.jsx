@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import './upload.css'
-import Grafico from './grafico';
 import { Link } from 'react-router-dom';
 
 export default function Upload() {
@@ -30,7 +29,7 @@ export default function Upload() {
       const formData = new FormData();
       formData.append('file', selectedFile,selectedFile.name);
 
-      await axios.post('http://192.168.62.76:8000/api/upload', formData, {
+      await axios.post('http://192.168.63.113:8000/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
