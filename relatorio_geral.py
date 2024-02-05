@@ -38,64 +38,77 @@ def convert_to_float(value):
 
 
 
-@app.post("/api/upload")
-async def upload_file(file: UploadFile = File(...)):
 
+def consult_files():
     try:
+        # Pasta compartilhada onde os arquivos estão localizados
+        folder_path = r"C:\Users\guilherme.santos\AGROCONTAR CONSULTORIA CONTABIL LTDA\Suporte - Documentos\Arquivos\Retrospectiva\Relatorios"
 
-        # Caminho completo para salvar o arquivo na pasta "relatorios"
-        relatorios_folder = "relatorios"
-        file_path = os.path.join(relatorios_folder, file.filename)
+        # Obtém a lista de arquivos na pasta compartilhada
+        files = os.listdir(folder_path)
 
-        # Salva o arquivo no diretório de relatórios
-        with open(file_path, "wb") as buffer:
-            buffer.write(file.file.read())
+        # Verifica se há arquivos na pasta
+        if not files:
+            print("Nenhum arquivo encontrado na pasta compartilhada.")
 
-        arquivo = file_path
+        # Assume o primeiro arquivo da lista como o arquivo a ser processado
+        file = os.path.join(folder_path, files[0])
+
         #Define o Padrao de Paginas Desejado
         paginas_desejadas = ['NOV - 2023', 'DEZ - 2023', 'JAN - 2024', 'FEV - 2024', 'MAR - 2024', 'ABR - 2024', 'MAI - 2024', 'JUN - 2024', 'JUL - 2024', 'AGO - 2024', 'SET - 2024', 'OUT - 2024', 'NOV - 2024','DEZ - 2024',]
 
-        #Faz um loop pelo arquivo guardando as Paginas Desejadas dentro do dicionario.
-        dados_por_pagina = {}
-        for pagina in paginas_desejadas:
-            if pagina in pd.ExcelFile(arquivo).sheet_names:
-                    dados_por_pagina[pagina] = pd.read_excel(arquivo, sheet_name=pagina)
-                    print(f"A pagina {pagina} Foi lida com sucesso!")
-
-        print(dados_por_pagina)
-        #Faz um loop em todos as paginas e guarda o valor total de cada uma em um array
-        arr_total = []
-        for df_atual in dados_por_pagina:
-            arr_total.append(dados_por_pagina[df_atual]['Total'].to_numpy())
-
-        #Cria a coluna Valida e coloca o array convertido em float
-        for pagina, df_atual in zip(paginas_desejadas, dados_por_pagina.values()):
-            df_atual['Total_Valid'] = [convert_to_float(val) for val in df_atual['Total']]
-
-        # #Cria um novo df somente com as colunas validas
         global df_final
         df_final = {}
-        
-        for pagina in dados_por_pagina:
-            df_final[pagina] = dados_por_pagina[pagina][['Tarefa','Total_Valid','Resultado_e_Aprendizado']]
-            df_final[pagina]['Resultado_e_Aprendizado'] = df_final[pagina]['Resultado_e_Aprendizado'].fillna("nenhum")
+        for file in files:
+            arquivo = os.path.join(folder_path, file)
+            #Faz um loop pelo arquivo guardando as Paginas Desejadas dentro do dicionario.
+            dados_por_pagina = {}
+            for pagina in paginas_desejadas:
+                if pagina in pd.ExcelFile(arquivo).sheet_names:
+                    dados_por_pagina[pagina] = pd.read_excel(arquivo, sheet_name=pagina)
+                    print(f"A pagina {pagina} do arquivo {file} foi lida com sucesso!")
+
+            #Cria a coluna Valida e coloca o array convertido em float
+            for pagina, df_atual in zip(paginas_desejadas, dados_por_pagina.values()):
+                df_atual['Total_Valid'] = [convert_to_float(val) for val in df_atual['Total']]
+
+            #Cria um novo df somente com as colunas validas e armazena no df_final
+            # Cria um novo df somente com as colunas validas e armazena no df_final
+            for pagina in dados_por_pagina:
+                if file not in df_final:
+                    df_final[file] = {}
+                df_final[file][pagina] = dados_por_pagina[pagina][['Tarefa', 'Total_Valid', 'Resultado_e_Aprendizado']]
+                df_final[file][pagina]['Resultado_e_Aprendizado'] = df_final[file][pagina]['Resultado_e_Aprendizado'].fillna("nenhum")
 
 
         return {"message": "Arquivo processado com sucesso!"}
-    
     except Exception as e:
-        # Trate exceções e retorne uma resposta apropriada
-        raise HTTPException(status_code=500, detail=f"Erro ao processar o arquivo: {str(e)}")
+        return {"message": f"Erro ao processar o arquivo: {str(e)}"}
 
-
-
+consult_files()
+print(df_final)
 @app.get("/api/dados")
 def obter_dados():
-    response_data = {
-        "data": {pagina: df.to_dict(orient='records') for pagina, df in df_final.items()}
-    }
-    return JSONResponse(content=response_data)
+    try:
+        # Cria um novo dicionário para armazenar os dados formatados
+        formatted_data = {}
 
+        # Itera sobre os arquivos e páginas no df_final
+        for arquivo, paginas in df_final.items():
+            arquivo_data = {}
+            # Itera sobre as páginas em cada arquivo
+            for pagina, df in paginas.items():
+                # Converte o DataFrame para uma lista de dicionários
+                pagina_data = df.to_dict(orient='records')
+                # Adiciona os dados da página ao dicionário do arquivo
+                arquivo_data[pagina] = pagina_data
+            # Adiciona os dados do arquivo ao dicionário formatado
+            formatted_data[arquivo] = arquivo_data
+
+        response_data = {"data": formatted_data}
+        return JSONResponse(content=response_data)
+    except Exception as e:
+        return JSONResponse(content={"error": f"Erro ao obter os dados: {str(e)}"})
 
 if __name__ == "__main__":
     import uvicorn
