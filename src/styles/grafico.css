@@ -1,20 +1,4 @@
 
-body{
-  color: #3b3b3b;
-  background-color: #ffffff;
-  display: flex;
-}
-
-h1{
-  text-align: center;
-}
-
-h2{
-  font-size: 1.3rem;
-  margin: 0;
-  padding: 2rem 80px;
-}
-
 .Conteiner-Graphics{
   display: flex;
   flex-direction: column;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import './grafico.css'
+import './styles/grafico.css'
 import { Chart } from "react-google-charts"
 import axios from 'axios';
 
@@ -23,9 +23,9 @@ function Grafico() {
         const formattedMesAtual = [["Tarefas", "Horas"]]
         const formattedLearnAtual = []
 
-        let dadosAno = response.data.data
+        let dadosAno = response.data.data["Retrospectiva - (Guilherme Silva) .xlsx"]
         let somaTarefas = {};
-
+        
         console.log(dadosAno)
 
         // Iterar sobre cada mês
