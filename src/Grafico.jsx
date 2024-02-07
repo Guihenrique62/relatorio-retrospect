@@ -15,7 +15,7 @@ function Grafico() {
     const fetchData = async () => {
       try {
         // Configuração do cabeçalho para contornar o CORS
-        const response = await axios.get('http://192.168.63.113:8000/api/dados');
+        const response = await axios.get('http://192.168.62.78:8000/api/dados');
     
         // Estruturando os dados para o formato que a biblioteca de gráficos espera
         const formattedData = [["Tarefas", "Horas"]];

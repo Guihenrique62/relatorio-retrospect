@@ -2,10 +2,12 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Chart } from "react-google-charts"
 import './styles/Dashboard.css'
+import UserContainer from './components/UserContainer';
 
 export default function Dashboard() {
     const [atendimentosTotais, setAtendimentosTotais] = useState([])
     const [top5Tarefas, setTop5Tarefas] = useState([])
+    const [nomesUsuario, setNomesUsuario] = useState([])
 
     useEffect(() => {
 
@@ -16,7 +18,7 @@ export default function Dashboard() {
         const fetchData = async () => {
         try {
             // Configuração do cabeçalho para contornar o CORS
-            const response = await axios.get('http://192.168.63.113:8000/api/dados');
+            const response = await axios.get('http://192.168.62.78:8000/api/dados');
             let totalData = response.data.data;
             const atendTotal = [["Mês", "Atendimentos", "Erros por Chamado", "Erros por Analise"]];
 
@@ -26,9 +28,11 @@ export default function Dashboard() {
             const totalErrAnalis = {}
             const totalHorasPorTarefa = {};
             const top5tarefasTotal = [['Tarefa','Horas']]
+            const namesOfUsers = []
 
             // Calcula os totais de atendimentos de cada usuário por mês
             for (const user in totalData) {
+                namesOfUsers.push(user.slice(0, -5))
                 for (const mes in totalData[user]) {
                     const antendimentosMes = totalData[user][mes]
                         .filter(tarefa => removerAcentos(tarefa.Tarefa.toUpperCase()) === "ATENDIMENTO CONCLUIDO")
@@ -80,23 +84,26 @@ export default function Dashboard() {
             top5Tarefas.forEach((task)=> {
                 top5tarefasTotal.push(task)
             })
-
-            console.log(atendTotal);
+            setNomesUsuario(namesOfUsers)
             setTop5Tarefas(top5tarefasTotal)
             setAtendimentosTotais(atendTotal)
-
         } catch (error) {
             console.error('Erro ao buscar dados:', error);
         }
     };
     fetchData();
 }, [])
+let totalAtendimentos = 0
+  for (let y = 1; y < atendimentosTotais.length; y++) {
+    totalAtendimentos = totalAtendimentos + atendimentosTotais[y][1]
+  }
 
 
   return (
     <div className='container_Dashboard'>
         
         <h1 className='tittle-dashboard'>Relatórios da Retrospect</h1>
+        <div className='row-container'></div>
 
         <div className='chart-top10'>
             <Chart
@@ -130,6 +137,7 @@ export default function Dashboard() {
 
 
         <div className='chart-attend-total'>
+            <p>Total de Atendimentos: {totalAtendimentos}</p>
             <Chart
             chartType="Bar"
             width="90%"
@@ -139,6 +147,16 @@ export default function Dashboard() {
             colors: ['#34ea80', '#dd7f32','#c9452e'],
             }}
             />
+        </div>
+
+        <h1 className='tittle-individual'>Relatórios Individuais</h1>
+        <div className='row-container-individual'></div>
+
+        <div className='users-container'>
+            {nomesUsuario.map((name, index) => (
+                <UserContainer key={index} name={name}></UserContainer>
+            ))}
+
         </div>
     </div>
     
