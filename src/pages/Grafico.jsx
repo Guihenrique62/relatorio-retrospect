@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import './styles/grafico.css'
+import '../styles/grafico.css'
 import { Chart } from "react-google-charts"
 import axios from 'axios';
+import { Link, useParams } from 'react-router-dom';
 
 function Grafico() {
 
@@ -9,13 +10,15 @@ function Grafico() {
   let [atendTotal, setAtendTotal] = useState([])
   let [ultimoMes, setultimoMes] = useState([])
   let [learnAtual, setLearnAtual] = useState([])
+  const { userName } = useParams();
+  const [loader, setLoader] = useState(false)
 
   useEffect(() => {
 
     const fetchData = async () => {
       try {
         // Configuração do cabeçalho para contornar o CORS
-        const response = await axios.get('http://192.168.62.78:8000/api/dados');
+        const response = await axios.get('http://192.168.1.12:8000/api/dados');
     
         // Estruturando os dados para o formato que a biblioteca de gráficos espera
         const formattedData = [["Tarefas", "Horas"]];
@@ -23,9 +26,8 @@ function Grafico() {
         const formattedMesAtual = [["Tarefas", "Horas"]]
         const formattedLearnAtual = []
 
-        let dadosAno = response.data.data["Retrospectiva - (Guilherme Silva) .xlsx"]
+        let dadosAno = response.data.data[`${userName}.xlsx`]
         let somaTarefas = {};
-        
         console.log(dadosAno)
 
         // Iterar sobre cada mês
@@ -94,7 +96,8 @@ function Grafico() {
         setData(formattedData);
         setAtendTotal(atendTotal)
         setLearnAtual(formattedLearnAtual)
-
+        setLoader(true)
+        console.log(atendTotal)
       } catch (error) {
         console.error('Erro ao buscar dados:', error);
       }
@@ -137,30 +140,88 @@ function Grafico() {
   const ultimoMesWithouHeader = ultimoMes.slice(1)
   const sortedultimoMes = ultimoMesWithouHeader.sort((a, b) => b[1] - a[1]);
   return (
-    <div className='Conteiner-Graphics'>
-      <h1>Resultados Da Retrospectiva</h1>
 
-      <h2>Total de Atendimentos: {totalAtendimentos}</h2>
+    <>
+        {loader ? 
+        <div className='Conteiner-Graphics'>
 
-      {/* Grafico total de atendimentos */}
-      <div className="atendimento-erro">
+        
+      
+        <h1>Relatório Individual {userName}</h1>
+        
+        <div className='row-container'></div>
 
-        <Chart
-          chartType="Bar"
-          width="800px"
-          height="300px"
-          data={atendTotal}
-          options={{
-            colors: ['#34ea80', '#dd7f32','#c9452e'],
-          }}
-        />
-      </div>
-
-      {/* {Tabela Mes Atual} */}
-
-      <h2>Total de Horas (ultimo Mês): {minToHours(ultimoMesminTotal)}</h2>
-      <div className="container-grafico-tabela">
-        <div className='tabela-mes-atual'>
+        <h2>Total de Atendimentos: {totalAtendimentos}</h2>
+  
+        {/* Grafico total de atendimentos */}
+        <div className="atendimento-erro">
+  
+          <Chart
+            chartType="Bar"
+            width="800px"
+            height="300px"
+            data={atendTotal}
+            options={{
+              colors: ['#34ea80', '#dd7f32','#c9452e'],
+            }}
+          />
+        </div>
+  
+        {/* {Tabela Mes Atual} */}
+  
+        <h2>Total de Horas (ultimo Mês): {minToHours(ultimoMesminTotal)}</h2>
+        <div className="container-grafico-tabela">
+          <div className='tabela-mes-atual'>
+            <table>
+              <thead>
+                <tr>
+                  <th>Tarefa</th>
+                  <th>Horas</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedultimoMes.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item[0]}</td>
+                    <td>{minToHours(item[1])}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <Chart
+            chartType="PieChart"
+            data={ultimoMes}
+            width={"100%"}
+            height={"600px"}
+          />
+        </div>
+  
+        <div className="container-table-learnig">
+          <h2>Aprendizados deste Mês:</h2>
+          <table className='table-learning'>
+              <thead>
+                <tr>
+                  <th>Tarefa</th>
+                  <th>Aprendizado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {learnAtual.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item[0]}</td>
+                    <td>{item[1]}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+        </div>
+  
+  
+        {/* Tabela total de horas */}
+        <h2>Total de Horas (Todos Os Meses): {minToHours(minTotal)}</h2>
+        <div className="container-grafico-tabela">
+          <div className='tabela-mes-atual'>
           <table>
             <thead>
               <tr>
@@ -169,7 +230,7 @@ function Grafico() {
               </tr>
             </thead>
             <tbody>
-              {sortedultimoMes.map((item, index) => (
+              {sortedData.map((item, index) => (
                 <tr key={index}>
                   <td>{item[0]}</td>
                   <td>{minToHours(item[1])}</td>
@@ -178,67 +239,22 @@ function Grafico() {
             </tbody>
           </table>
         </div>
-        <Chart
-          chartType="PieChart"
-          data={ultimoMes}
-          width={"100%"}
-          height={"600px"}
-        />
+          {/* Grafico total de Horas */}
+          <Chart
+            chartType="PieChart"
+            data={data}
+            width={"100%"}
+            height={"600px"}
+          />
+        </div>
+  
+        
       </div>
-
-      <div className="container-table-learnig">
-        <h2>Aprendizados deste Mês:</h2>
-        <table className='table-learning'>
-            <thead>
-              <tr>
-                <th>Tarefa</th>
-                <th>Aprendizado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {learnAtual.map((item, index) => (
-                <tr key={index}>
-                  <td>{item[0]}</td>
-                  <td>{item[1]}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-      </div>
-
-
-      {/* Tabela total de horas */}
-      <h2>Total de Horas (Todos Os Meses): {minToHours(minTotal)}</h2>
-      <div className="container-grafico-tabela">
-        <div className='tabela-mes-atual'>
-        <table>
-          <thead>
-            <tr>
-              <th>Tarefa</th>
-              <th>Horas</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sortedData.map((item, index) => (
-              <tr key={index}>
-                <td>{item[0]}</td>
-                <td>{minToHours(item[1])}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-        {/* Grafico total de Horas */}
-        <Chart
-          chartType="PieChart"
-          data={data}
-          width={"100%"}
-          height={"600px"}
-        />
-      </div>
-
       
-    </div>
+    : <div>Carregando...</div>}
+
+    
+    </>
   )
 }
 

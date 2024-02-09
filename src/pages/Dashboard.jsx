@@ -1,13 +1,14 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Chart } from "react-google-charts"
-import './styles/Dashboard.css'
-import UserContainer from './components/UserContainer';
+import '../styles/Dashboard.css'
+import UserContainer from '../components/UserContainer';
 
 export default function Dashboard() {
     const [atendimentosTotais, setAtendimentosTotais] = useState([])
     const [top5Tarefas, setTop5Tarefas] = useState([])
     const [nomesUsuario, setNomesUsuario] = useState([])
+    const [loader, setLoader] = useState(false)
 
     useEffect(() => {
 
@@ -18,7 +19,7 @@ export default function Dashboard() {
         const fetchData = async () => {
         try {
             // Configuração do cabeçalho para contornar o CORS
-            const response = await axios.get('http://192.168.62.78:8000/api/dados');
+            const response = await axios.get('http://192.168.1.12:8000/api/dados');
             let totalData = response.data.data;
             const atendTotal = [["Mês", "Atendimentos", "Erros por Chamado", "Erros por Analise"]];
 
@@ -87,24 +88,25 @@ export default function Dashboard() {
             setNomesUsuario(namesOfUsers)
             setTop5Tarefas(top5tarefasTotal)
             setAtendimentosTotais(atendTotal)
+            setLoader(true)
         } catch (error) {
             console.error('Erro ao buscar dados:', error);
         }
     };
     fetchData();
 }, [])
+
 let totalAtendimentos = 0
-  for (let y = 1; y < atendimentosTotais.length; y++) {
-    totalAtendimentos = totalAtendimentos + atendimentosTotais[y][1]
-  }
+for (let y = 1; y < atendimentosTotais.length; y++) {totalAtendimentos = totalAtendimentos + atendimentosTotais[y][1]}
 
 
   return (
-    <div className='container_Dashboard'>
+<>
+{loader ? <div className='container_Dashboard'>
         
         <h1 className='tittle-dashboard'>Relatórios da Retrospect</h1>
         <div className='row-container'></div>
-
+        
         <div className='chart-top10'>
             <Chart
             chartType="PieChart"
@@ -158,8 +160,9 @@ let totalAtendimentos = 0
             ))}
 
         </div>
-    </div>
+    </div> : <div>Carregando...</div>}
     
-  
+    
+  </>
   )
 }

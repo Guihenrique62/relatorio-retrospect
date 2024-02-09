@@ -85,11 +85,12 @@ def consult_files():
     except Exception as e:
         return {"message": f"Erro ao processar o arquivo: {str(e)}"}
 
-consult_files()
-print(df_final)
+
 @app.get("/api/dados")
 def obter_dados():
     try:
+        consult_files()
+
         # Cria um novo dicionário para armazenar os dados formatados
         formatted_data = {}
 

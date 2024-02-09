@@ -1,12 +1,15 @@
 import {createBrowserRouter} from "react-router-dom"
-import Grafico from "./grafico"
+import Grafico from "./pages/Grafico"
 import Upload from "./upload"
-import Dashboard from "./Dashboard"
+import Dashboard from "./pages/Dashboard"
+import RouterLayout from "./pages/RouterLayout"
 
 const router = createBrowserRouter([
-    {path: '/', element: <Dashboard/>, },
+    {path: '/', element: <RouterLayout/>, children:[
+        {index: true, element: <Dashboard/>},
+        {path: 'graphic/:userName',element: <Grafico/>},
+    ] },
     {path: 'upload', element: <Upload/>},
-    {path: 'graphic', element: <Grafico/>}
 ])
 
 
