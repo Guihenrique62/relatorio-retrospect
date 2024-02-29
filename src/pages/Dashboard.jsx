@@ -19,7 +19,7 @@ export default function Dashboard() {
         const fetchData = async () => {
         try {
             // Configuração do cabeçalho para contornar o CORS
-            const response = await axios.get('http://192.168.1.12:8000/api/dados');
+            const response = await axios.get('http://192.168.62.106:8000/api/dados');
             let totalData = response.data.data;
             const atendTotal = [["Mês", "Atendimentos", "Erros por Chamado", "Erros por Analise"]];
 

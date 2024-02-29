@@ -38,7 +38,7 @@ def convert_to_float(value):
 
 
 
-
+#Consulta as planilhas e trata os dados
 def consult_files():
     try:
         # Pasta compartilhada onde os arquivos estão localizados
@@ -90,7 +90,6 @@ def consult_files():
 def obter_dados():
     try:
         consult_files()
-
         # Cria um novo dicionário para armazenar os dados formatados
         formatted_data = {}
 
